@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员任务管理 - SDNU机器人与人工智能实验室协作管理平台</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+            background: #f0f2f5;
+        }
+        
+        /* 顶部主标题栏 */
+        .main-header {
+            background-color: #373d41;
+            color: white;
+            padding: 0 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        /* 二级导航栏 */
+        .second-header {
+            background-color: #4e5960;
+            height: 45px;
+            border-bottom: 1px solid #ddd;
+            width: 100%;
+        }
+        .el-menu--horizontal {
+            background-color: #4e5960;
+            border-bottom: none;
+            width: 100%;
+        }
+        .el-menu--horizontal .el-submenu {
+            float: left;
+        }
+        .el-menu--horizontal .el-submenu .el-submenu__title {
+            color: white;
+            height: 45px;
+            line-height: 45px;
+            border-bottom: 2px solid transparent;
+            padding: 0 20px;
+        }
+        .el-menu--horizontal .el-submenu .el-submenu__title:hover {
+            background-color: #5c6770;
+            border-bottom-color: #20a0ff;
+        }
+        .el-menu--horizontal .el-submenu.is-active .el-submenu__title {
+            border-bottom-color: #20a0ff;
+        }
+        .el-submenu__popup {
+            top: 45px !important;
+        }
+        .el-menu--popup {
+            background-color: #545c64;
+        }
+        .el-menu--popup .el-menu-item {
+            color: white;
+        }
+        .el-menu--popup .el-menu-item:hover {
+            background-color: #444c53;
+        }
+        
+        .layout-container {
+            min-height: 100vh;
+        }
+        
+        .main-container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .filter-bar {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .batch-actions {
+            background: white;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .batch-actions .el-button {
+            margin-right: 10px;
+        }
+        
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stats-card {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .stats-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .stats-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .priority-high {
+            color: #F56C6C;
+        }
+        
+        .priority-medium {
+            color: #E6A23C;
+        }
+        
+        .priority-low {
+            color: #67C23A;
+        }
+        
+        .task-item {
+            background: #f9f9f9;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 3px solid #409EFF;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .task-item:hover {
+            background: #f0f0f0;
+            transform: translateX(2px);
+        }
+        
+        .task-item.priority-high {
+            border-left-color: #F56C6C;
+        }
+        
+        .task-item.priority-medium {
+            border-left-color: #E6A23C;
+        }
+        
+        .task-item.priority-low {
+            border-left-color: #67C23A;
+        }
+        
+        .task-points {
+            background: #409EFF;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+        
+        .task-participants {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .task-avatar {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .operation-buttons {
+            display: flex;
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="layout-container">
+            <!-- 顶部主标题栏 -->
+            <div class="main-header">
+                <div class="logo">
+                    <span>SDNU机器人与人工智能实验室协作管理平台</span>
+                </div>
+            </div>
+            
+            <!-- 二级导航栏 -->
+            <div class="second-header">
+                <el-menu mode="horizontal" @select="changePage">
+                    <!-- 用户管理二级菜单 -->
+                    <el-submenu index="user">
+                        <template slot="title">用户管理</template>
+                        <el-menu-item index="user-info">信息</el-menu-item>
+                        <el-menu-item index="user-points">积分</el-menu-item>
+                        <el-menu-item index="user-attendance">考勤</el-menu-item>
+                        <el-menu-item index="user-messaging">即时通讯</el-menu-item>
+                    </el-submenu>
+                    
+                    <!-- 设备管理二级菜单 -->
+                    <el-submenu index="device">
+                        <template slot="title">设备管理</template>
+                    </el-submenu>
+                    
+                    <!-- 任务管理二级菜单 -->
+                    <el-submenu index="task" class="is-active">
+                        <template slot="title">任务管理</template>
+                        <el-menu-item index="task-rules">积分规则</el-menu-item>
+                        <el-menu-item index="task-view">任务查看</el-menu-item>
+                        <el-menu-item index="task-my">我的任务</el-menu-item>
+                        <el-menu-item index="task-upload">成果上传</el-menu-item>
+                    </el-submenu>
+                </el-menu>
+            </div>
+            
+            <!-- 主内容区域 - 保持原任务管理页面内容不变 -->
+            <div class="main-container">
+                <!-- 统计卡片 -->
+                <div class="stats-cards">
+                    <el-card class="stats-card">
+                        <div class="stats-number" style="color: #409EFF;">{{ taskStats.total }}</div>
+                        <div class="stats-label">总任务数</div>
+                    </el-card>
+                    <el-card class="stats-card">
+                        <div class="stats-number" style="color: #E6A23C;">{{ taskStats.inProgress }}</div>
+                        <div class="stats-label">进行中</div>
+                    </el-card>
+                    <el-card class="stats-card">
+                        <div class="stats-number" style="color: #67C23A;">{{ taskStats.completed }}</div>
+                        <div class="stats-label">已完成</div>
+                    </el-card>
+                    <el-card class="stats-card">
+                        <div class="stats-number" style="color: #909399;">{{ taskStats.pending }}</div>
+                        <div class="stats-label">待领取</div>
+                    </el-card>
+                    <el-card class="stats-card">
+                        <div class="stats-number" style="color: #409EFF;">{{ userStats.total }}</div>
+                        <div class="stats-label">总用户数</div>
+                    </el-card>
+                    <el-card class="stats-card">
+                        <div class="stats-number" style="color: #F56C6C;">{{ userStats.active }}</div>
+                        <div class="stats-label">活跃用户</div>
+                    </el-card>
+                </div>
+                
+                <!-- 筛选栏 -->
+                <div class="filter-bar">
+                    <el-select v-model="filters.project" placeholder="项目筛选" clearable style="width: 150px;">
+                        <el-option label="全部项目" value=""></el-option>
+                        <el-option label="RoboCup竞赛" value="RoboCup竞赛"></el-option>
+                        <el-option label="智能巡检项目" value="智能巡检项目"></el-option>
+                        <el-option label="日常管理" value="日常管理"></el-option>
+                    </el-select>
+                    
+                    <el-select v-model="filters.status" placeholder="状态筛选" clearable style="width: 120px;">
+                        <el-option label="全部状态" value=""></el-option>
+                        <el-option label="待领取" value="待领取"></el-option>
+                        <el-option label="进行中" value="进行中"></el-option>
+                        <el-option label="待审核" value="待审核"></el-option>
+                        <el-option label="已完成" value="已完成"></el-option>
+                    </el-select>
+                    
+                    <el-select v-model="filters.priority" placeholder="优先级筛选" clearable style="width: 120px;">
+                        <el-option label="全部优先级" value=""></el-option>
+                        <el-option label="高" value="高"></el-option>
+                        <el-option label="中" value="中"></el-option>
+                        <el-option label="低" value="低"></el-option>
+                    </el-select>
+                    
+                    <el-select v-model="filters.assignee" placeholder="负责人筛选" clearable style="width: 150px;">
+                        <el-option label="全部负责人" value=""></el-option>
+                        <el-option label="未分配" value="unassigned"></el-option>
+                        <el-option v-for="user in users" :key="user.id" :label="user.name" :value="user.id"></el-option>
+                    </el-select>
+                    
+                    <el-date-picker
+                        v-model="filters.dateRange"
+                        type="daterange"
+                        range-separator="至"
+                        start-placeholder="开始日期"
+                        end-placeholder="结束日期"
+                        clearable
+                        style="width: 250px;">
+                    </el-date-picker>
+                    
+                    <el-input v-model="filters.searchText" placeholder="搜索任务..." prefix-icon="el-icon-search" style="width: 200px;"></el-input>
+                    
+                    <div style="flex: 1;"></div>
+                    
+                    <el-button type="primary" @click="showAddDialog">添加事项</el-button>
+                    <el-button type="primary" @click="resetFilters">重置筛选</el-button>
+                    <el-button type="success" @click="exportData">导出数据</el-button>
+                </div>
+                
+                <!-- 批量操作栏 -->
+                <div class="batch-actions" v-if="selectedRows.length > 0">
+                    <div>已选择 <strong>{{ selectedRows.length }}</strong> 项</div>
+                    <el-select v-model="batchStatus" placeholder="选择状态" style="width: 120px;">
+                        <el-option label="待领取" value="待领取"></el-option>
+                        <el-option label="进行中" value="进行中"></el-option>
+                        <el-option label="待审核" value="待审核"></el-option>
+                        <el-option label="已完成" value="已完成"></el-option>
+                    </el-select>
+                    <el-button type="warning" @click="batchUpdateStatus" v-if="batchStatus">批量更新状态</el-button>
+                    <el-button type="danger" @click="batchDelete">批量删除</el-button>
+                    <el-button type="info" @click="clearSelection">取消选择</el-button>
+                </div>
+                
+                <!-- 管理员表格 -->
+                <el-card>
+                    <el-table 
+                        :data="filteredItems" 
+                        style="width: 100%"
+                        border
+                        @selection-change="handleSelectionChange"
+                        ref="table"
+                        v-loading="loading">
+                        
+                        <el-table-column type="selection" width="55"></el-table-column>
+                        <el-table-column type="index" label="序号" width="60"></el-table-column>
+                        
+                        <el-table-column prop="title" label="任务名称" min-width="200">
+                            <template slot-scope="scope">
+                                <div style="cursor: pointer;" @click="showDetail(scope.row)">
+                                    <div style="font-weight: bold;">{{ scope.row.title }}</div>
+                                    <div style="font-size: 12px; color: #999;">{{ scope.row.project }}</div>
+                                </div>
+                            </template>
+                        </el-table-column>
+                        
+                        <el-table-column prop="status" label="状态" width="100">
+                            <template slot-scope="scope">
+                                <el-tag :type="getStatusType(scope.row.status)" size="mini">
+                                    {{ scope.row.status }}
+                                </el-tag>
+                            </template>
+                        </el-table-column>
+                        
+                        <el-table-column prop="priority" label="优先级" width="80">
+                            <template slot-scope="scope">
+                                <span :class="'priority-' + scope.row.priority">{{ scope.row.priority }}</span>
+                            </template>
+                        </el-table-column>
+                        
+                        <el-table-column prop="points" label="积分" width="80">
+                            <template slot-scope="scope">
+                                <span class="task-points">{{ scope.row.points }}</span>
+                            </template>
+                        </el-table-column>
+                        
+                        <el-table-column prop="participants" label="负责人" width="150">
+                            <template slot-scope="scope">
+                                <div class="task-participants">
+                                    <el-avatar 
+                                        v-for="participant in scope.row.participants" 
+                                        :key="participant.id"
+                                        :size="24" 
+                                        class="task-avatar">
+                                        {{ participant.name.charAt(0) }}
+                                    </el-avatar>
+                                    <span v-if="scope.row.participants.length === 0" style="color: #999; font-size: 12px;">未分配</span>
+                                </div>
+                            </template>
+                        </el-table-column>
+                        
+                        <el-table-column prop="deadline" label="截止日期" width="120"></el-table-column>
+                        <el-table-column prop="createdAt" label="创建时间" width="140"></el-table-column>
+                        
+                        <el-table-column label="操作" width="200">
+                            <template slot-scope="scope">
+                                <div class="operation-buttons">
+                                    <el-button size="mini" type="primary" @click="editItem(scope.row)">
+                                        编辑
+                                    </el-button>
+                                    <el-button size="mini" type="info" @click="showDetail(scope.row)">
+                                        详情
+                                    </el-button>
+                                    <el-button size="mini" type="danger" @click="deleteItem(scope.row)">
+                                        删除
+                                    </el-button>
+                                </div>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                    
+                    <!-- 分页 -->
+                    <div style="margin-top: 15px; text-align: right;">
+                        <el-pagination
+                            @size-change="handleSizeChange"
+                            @current-change="handleCurrentChange"
+                            :current-page="currentPage"
+                            :page-sizes="[10, 20, 50, 100]"
+                            :page-size="pageSize"
+                            layout="total, sizes, prev, pager, next, jumper"
+                            :total="filteredItems.length">
+                        </el-pagination>
+                    </div>
+                </el-card>
+            </div>
+        </div>
+        
+        <!-- 添加事项对话框 -->
+        <el-dialog title="添加新任务" :visible.sync="addVisible" width="60%">
+            <el-form :model="newTask" :rules="addRules" ref="addForm" label-width="100px">
+                <el-form-item label="任务名称" prop="title">
+                    <el-input v-model="newTask.title" placeholder="请输入任务名称"></el-input>
+                </el-form-item>
+                
+                <el-form-item label="所属项目" prop="project">
+                    <el-select v-model="newTask.project" placeholder="请选择项目">
+                        <el-option label="RoboCup竞赛" value="RoboCup竞赛"></el-option>
+                        <el-option label="智能巡检项目" value="智能巡检项目"></el-option>
+                        <el-option label="日常管理" value="日常管理"></el-option>
+                    </el-select>
+                </el-form-item>
+                
+                <el-form-item label="任务状态" prop="status">
+                    <el-select v-model="newTask.status" placeholder="请选择状态">
+                        <el-option label="待领取" value="待领取"></el-option>
+                        <el-option label="进行中" value="进行中"></el-option>
+                        <el-option label="待审核" value="待审核"></el-option>
+                        <el-option label="已完成" value="已完成"></el-option>
+                    </el-select>
+                </el-form-item>
+                
+                <el-form-item label="优先级" prop="priority">
+                    <el-select v-model="newTask.priority" placeholder="请选择优先级">
+                        <el-option label="高" value="高"></el-option>
+                        <el-option label="中" value="中"></el-option>
+                        <el-option label="低" value="低"></el-option>
+                    </el-select>
+                </el-form-item>
+                
+                <el-form-item label="积分奖励" prop="points">
+                    <el-input v-model.number="newTask.points" type="number" placeholder="请输入积分"></el-input>
+                </el-form-item>
+                
+                <el-form-item label="截止日期" prop="deadline">
+                    <el-date-picker v-model="newTask.deadline" type="date" placeholder="选择截止日期"></el-date-picker>
+                </el-form-item>
+                
+                <el-form-item label="负责人" prop="participants">
+                    <el-select 
+                        v-model="newTask.participants" 
+                        multiple 
+                        placeholder="请选择负责人"
+                        style="width: 100%;">
+                        <el-option v-for="user in users" :key="user.id" :label="user.name" :value="user.id"></el-option>
+                    </el-select>
+                </el-form-item>
+                
+                <el-form-item label="所需技能" prop="requiredSkills">
+                    <el-select 
+                        v-model="newTask.requiredSkills" 
+                        multiple 
+                        placeholder="请选择所需技能"
+                        style="width: 100%;">
+                        <el-option label="C++" value="C++"></el-option>
+                        <el-option label="Python" value="Python"></el-option>
+                        <el-option label="ROS" value="ROS"></el-option>
+                        <el-option label="算法" value="算法"></el-option>
+                        <el-option label="传感器" value="传感器"></el-option>
+                        <el-option label="UI设计" value="UI设计"></el-option>
+                        <el-option label="HTML" value="HTML"></el-option>
+                        <el-option label="CSS" value="CSS"></el-option>
+                        <el-option label="文档写作" value="文档写作"></el-option>
+                    </el-select>
+                </el-form-item>
+                
+                <el-form-item label="任务描述" prop="description">
+                    <el-input v-model="newTask.description" type="textarea" rows="4" placeholder="请输入任务描述"></el-input>
+                </el-form-item>
+            </el-form>
+            
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="addVisible = false">取消</el-button>
+                <el-button type="primary" @click="saveAdd">添加</el-button>
+            </div>
+        </el-dialog>
+        
+        <!-- 任务详情对话框 -->
+        <el-dialog title="任务详情" :visible.sync="detailVisible" width="60%">
+            <div v-if="selectedItem">
+                <el-descriptions :column="2" border>
+                    <el-descriptions-item label="任务名称">{{ selectedItem.title }}</el-descriptions-item>
+                    <el-descriptions-item label="所属项目">{{ selectedItem.project }}</el-descriptions-item>
+                    <el-descriptions-item label="任务状态">
+                        <el-tag :type="getStatusType(selectedItem.status)" size="small">
+                            {{ selectedItem.status }}
+                        </el-tag>
+                    </el-descriptions-item>
+                    <el-descriptions-item label="优先级">
+                        <span :class="'priority-' + selectedItem.priority">{{ selectedItem.priority }}优先级</span>
+                    </el-descriptions-item>
+                    <el-descriptions-item label="积分奖励">{{ selectedItem.points }}分</el-descriptions-item>
+                    <el-descriptions-item label="截止日期">{{ selectedItem.deadline }}</el-descriptions-item>
+                    <el-descriptions-item label="创建时间">{{ selectedItem.createdAt }}</el-descriptions-item>
+                    <el-descriptions-item label="创建人">{{ selectedItem.creator }}</el-descriptions-item>
+                    <el-descriptions-item label="参与者" :span="2">
+                        <div class="task-participants">
+                            <el-avatar 
+                                v-for="participant in selectedItem.participants" 
+                                :key="participant.id"
+                                :size="24" 
+                                class="task-avatar"
+                                style="margin-right: 5px;">
+                                {{ participant.name.charAt(0) }}
+                            </el-avatar>
+                            <span v-if="selectedItem.participants.length === 0" style="color: #999;">未分配</span>
+                        </div>
+                    </el-descriptions-item>
+                </el-descriptions>
+                
+                <div style="margin-top: 20px;">
+                    <h4>任务描述</h4>
+                    <p>{{ selectedItem.description }}</p>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <h4>所需技能</h4>
+                    <el-tag v-for="skill in selectedItem.requiredSkills" :key="skill" size="small" style="margin-right: 5px;">
+                        {{ skill }}
+                    </el-tag>
+                </div>
+            </div>
+            
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="detailVisible = false">关闭</el-button>
+            </div>
+        </el-dialog>
+        
+        <!-- 编辑任务对话框 -->
+        <el-dialog title="编辑任务" :visible.sync="editVisible" width="60%">
+            <el-form :model="form" :rules="rules" ref="form" label-width="100px">
+                <el-form-item label="任务名称" prop="title">
+                    <el-input v-model="form.title" placeholder="请输入任务名称"></el-input>
+                </el-form-item>
+                
+                <el-form-item label="所属项目" prop="project">
+                    <el-select v-model="form.project" placeholder="请选择项目">
+                        <el-option label="RoboCup竞赛" value="RoboCup竞赛"></el-option>
+                        <el-option label="智能巡检项目" value="智能巡检项目"></el-option>
+                        <el-option label="日常管理" value="日常管理"></el-option>
+                    </el-select>
+                </el-form-item>
+                
+                <el-form-item label="任务状态" prop="status">
+                    <el-select v-model="form.status" placeholder="请选择状态">
+                        <el-option label="待领取" value="待领取"></el-option>
+                        <el-option label="进行中" value="进行中"></el-option>
+                        <el-option label="待审核" value="待审核"></el-option>
+                        <el-option label="已完成" value="已完成"></el-option>
+                    </el-select>
+                </el-form-item>
+                
+                <el-form-item label="优先级" prop="priority">
+                    <el-select v-model="form.priority" placeholder="请选择优先级">
+                        <el-option label="高" value="高"></el-option>
+                        <el-option label="中" value="中"></el-option>
+                        <el-option label="低" value="低"></el-option>
+                    </el-select>
+                </el-form-item>
+                
+                <el-form-item label="积分奖励" prop="points">
+                    <el-input v-model="form.points" type="number" placeholder="请输入积分"></el-input>
+                </el-form-item>
+                
+                <el-form-item label="截止日期" prop="deadline">
+                    <el-date-picker v-model="form.deadline" type="date" placeholder="选择截止日期"></el-date-picker>
+                </el-form-item>
+                
+                <el-form-item label="负责人" prop="participants">
+                    <el-select 
+                        v-model="form.participants" 
+                        multiple 
+                        placeholder="请选择负责人"
+                        style="width: 100%;">
+                        <el-option v-for="user in users" :key="user.id" :label="user.name" :value="user.id"></el-option>
+                    </el-select>
+                </el-form-item>
+                
+                <el-form-item label="所需技能" prop="requiredSkills">
+                    <el-select 
+                        v-model="form.requiredSkills" 
+                        multiple 
+                        placeholder="请选择所需技能"
+                        style="width: 100%;">
+                        <el-option label="C++" value="C++"></el-option>
+                        <el-option label="Python" value="Python"></el-option>
+                        <el-option label="ROS" value="ROS"></el-option>
+                        <el-option label="算法" value="算法"></el-option>
+                        <el-option label="传感器" value="传感器"></el-option>
+                        <el-option label="UI设计" value="UI设计"></el-option>
+                        <el-option label="HTML" value="HTML"></el-option>
+                        <el-option label="CSS" value="CSS"></el-option>
+                        <el-option label="文档写作" value="文档写作"></el-option>
+                    </el-select>
+                </el-form-item>
+                
+                <el-form-item label="任务描述" prop="description">
+                    <el-input v-model="form.description" type="textarea" rows="4" placeholder="请输入任务描述"></el-input>
+                </el-form-item>
+            </el-form>
+            
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="editVisible = false">取消</el-button>
+                <el-button type="primary" @click="saveEdit">保存</el-button>
+            </div>
+        </el-dialog>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    // 加载状态
+                    loading: false,
+                    
+                    // 分页参数
+                    currentPage: 1,
+                    pageSize: 10,
+                    
+                    // 筛选条件
+                    filters: {
+                        project: '',
+                        status: '',
+                        priority: '',
+                        assignee: '',
+                        dateRange: [],
+                        searchText: ''
+                    },
+                    
+                    // 批量操作
+                    selectedRows: [],
+                    batchStatus: '',
+                    
+                    // 对话框状态
+                    addVisible: false,
+                    detailVisible: false,
+                    editVisible: false,
+                    selectedItem: null,
+                    
+                    // 表单数据
+                    newTask: {
+                        title: '',
+                        project: '',
+                        status: '待领取',
+                        priority: '中',
+                        points: 10,
+                        deadline: '',
+                        participants: [],
+                        requiredSkills: [],
+                        description: ''
+                    },
+                    form: {},
+                    rules: {
+                        title: [
+                            { required: true, message: '请输入任务名称', trigger: 'blur' }
+                        ],
+                        project: [
+                            { required: true, message: '请选择所属项目', trigger: 'change' }
+                        ],
+                        status: [
+                            { required: true, message: '请选择任务状态', trigger: 'change' }
+                        ],
+                        priority: [
+                            { required: true, message: '请选择优先级', trigger: 'change' }
+                        ],
+                        points: [
+                            { required: true, message: '请输入积分', trigger: 'blur' },
+                            { type: 'number', message: '积分必须为数字', trigger: 'blur' }
+                        ],
+                        deadline: [
+                            { required: true, message: '请选择截止日期', trigger: 'change' }
+                        ]
+                    },
+                    addRules: {
+                        title: [
+                            { required: true, message: '请输入任务名称', trigger: 'blur' }
+                        ],
+                        project: [
+                            { required: true, message: '请选择所属项目', trigger: 'change' }
+                        ],
+                        status: [
+                            { required: true, message: '请选择任务状态', trigger: 'change' }
+                        ],
+                        priority: [
+                            { required: true, message: '请选择优先级', trigger: 'change' }
+                        ],
+                        points: [
+                            { required: true, message: '请输入积分', trigger: 'blur' },
+                            { type: 'number', message: '积分必须为数字', trigger: 'blur' }
+                        ],
+                        deadline: [
+                            { required: true, message: '请选择截止日期', trigger: 'change' }
+                        ]
+                    },
+                    
+                    // 统计数据
+                    taskStats: {
+                        total: 25,
+                        inProgress: 8,
+                        completed: 12,
+                        pending: 5
+                    },
+                    userStats: {
+                        total: 15,
+                        active: 10
+                    },
+                    
+                    // 用户数据
+                    users: [
+                        { id: 1, name: '张三' },
+                        { id: 2, name: '李四' },
+                        { id: 3, name: '王五' },
+                        { id: 4, name: '赵六' },
+                        { id: 5, name: '钱七' }
+                    ],
+                    
+                    // 任务数据
+                    tasks: [
+                        {
+                            id: 1,
+                            title: '机器人路径规划算法优化',
+                            project: 'RoboCup竞赛',
+                            status: '进行中',
+                            priority: '高',
+                            points: 50,
+                            deadline: '2024-01-25',
+                            createdAt: '2024-01-10',
+                            creator: '管理员',
+                            description: '优化现有的A*路径规划算法，提高机器人在复杂环境中的导航效率和准确性。',
+                            requiredSkills: ['C++', 'ROS', '算法'],
+                            participants: [
+                                { id: 1, name: '张三' },
+                                { id: 2, name: '李四' }
+                            ]
+                        },
+                        {
+                            id: 2,
+                            title: '传感器数据采集模块开发',
+                            project: '智能巡检项目',
+                            status: '待领取',
+                            priority: '中',
+                            points: 30,
+                            deadline: '2024-01-30',
+                            createdAt: '2024-01-12',
+                            creator: '管理员',
+                            description: '开发统一的传感器数据采集接口，支持多种传感器类型。',
+                            requiredSkills: ['Python', 'ROS', '传感器'],
+                            participants: []
+                        },
+                        {
+                            id: 3,
+                            title: '实验室值日安排',
+                            project: '日常管理',
+                            status: '已完成',
+                            priority: '低',
+                            points: 5,
+                            deadline: '2024-01-15',
+                            createdAt: '2024-01-14',
+                            creator: '管理员',
+                            description: '负责实验室的日常清洁和设备维护。',
+                            requiredSkills: [],
+                            participants: [
+                                { id: 3, name: '王五' }
+                            ]
+                        },
+                        {
+                            id: 4,
+                            title: '竞赛报告撰写',
+                            project: 'RoboCup竞赛',
+                            status: '待审核',
+                            priority: '中',
+                            points: 20,
+                            deadline: '2024-01-20',
+                            createdAt: '2024-01-08',
+                            creator: '管理员',
+                            description: '撰写RoboCup竞赛的技术报告和参赛总结。',
+                            requiredSkills: ['文档写作'],
+                            participants: [
+                                { id: 1, name: '张三' }
+                            ]
+                        },
+                        {
+                            id: 5,
+                            title: '网站界面设计',
+                            project: '智能巡检项目',
+                            status: '待领取',
+                            priority: '低',
+                            points: 25,
+                            deadline: '2024-02-05',
+                            createdAt: '2024-01-15',
+                            creator: '管理员',
+                            description: '设计项目展示网站的用户界面。',
+                            requiredSkills: ['UI设计', 'HTML', 'CSS'],
+                            participants: []
+                        },
+                        {
+                            id: 6,
+                            title: '机器视觉识别模块优化',
+                            project: 'RoboCup竞赛',
+                            status: '进行中',
+                            priority: '高',
+                            points: 40,
+                            deadline: '2024-01-28',
+                            createdAt: '2024-01-05',
+                            creator: '管理员',
+                            description: '优化现有视觉识别算法，提高在复杂背景下的识别准确率。',
+                            requiredSkills: ['Python', 'OpenCV', '深度学习'],
+                            participants: [
+                                { id: 4, name: '赵六' }
+                            ]
+                        },
+                        {
+                            id: 7,
+                            title: '项目文档整理',
+                            project: '智能巡检项目',
+                            status: '进行中',
+                            priority: '低',
+                            points: 15,
+                            deadline: '2024-02-10',
+                            createdAt: '2024-01-18',
+                            creator: '管理员',
+                            description: '整理项目开发过程中的技术文档和用户手册。',
+                            requiredSkills: ['文档写作'],
+                            participants: [
+                                { id: 5, name: '钱七' }
+                            ]
+                        }
+                    ]
+                };
+            },
+            computed: {
+                // 筛选后的任务列表
+                filteredItems() {
+                    return this.tasks.filter(task => {
+                        // 项目筛选
+                        if (this.filters.project && task.project !== this.filters.project) {
+                            return false;
+                        }
+                        
+                        // 状态筛选
+                        if (this.filters.status && task.status !== this.filters.status) {
+                            return false;
+                        }
+                        
+                        // 优先级筛选
+                        if (this.filters.priority && task.priority !== this.filters.priority) {
+                            return false;
+                        }
+                        
+                        // 负责人筛选
+                        if (this.filters.assignee === 'unassigned') {
+                            if (task.participants.length > 0) return false;
+                        } else if (this.filters.assignee) {
+                            const assigneeId = parseInt(this.filters.assignee);
+                            if (!task.participants.some(p => p.id === assigneeId)) {
+                                return false;
+                            }
+                        }
+                        
+                        // 日期范围筛选
+                        if (this.filters.dateRange && this.filters.dateRange.length === 2) {
+                            const startDate = new Date(this.filters.dateRange[0]);
+                            const endDate = new Date(this.filters.dateRange[1]);
+                            const taskDate = new Date(task.createdAt);
+                            
+                            if (taskDate < startDate || taskDate > endDate) {
+                                return false;
+                            }
+                        }
+                        
+                        // 搜索文本筛选
+                        if (this.filters.searchText) {
+                            const searchLower = this.filters.searchText.toLowerCase();
+                            if (!(
+                                task.title.toLowerCase().includes(searchLower) ||
+                                task.description.toLowerCase().includes(searchLower)
+                            )) {
+                                return false;
+                            }
+                        }
+                        
+                        return true;
+                    });
+                }
+            },
+            methods: {
+                // 显示添加任务对话框
+                showAddDialog() {
+                    // 重置表单数据
+                    this.newTask = {
+                        title: '',
+                        project: '',
+                        status: '待领取',
+                        priority: '中',
+                        points: 10,
+                        deadline: '',
+                        participants: [],
+                        requiredSkills: [],
+                        description: ''
+                    };
+                    this.addVisible = true;
+                },
+                
+                // 保存新任务
+                saveAdd() {
+                    this.$refs.addForm.validate((valid) => {
+                        if (valid) {
+                            // 创建新任务对象
+                            const newTask = {
+                                id: this.tasks.length > 0 ? Math.max(...this.tasks.map(t => t.id)) + 1 : 1,
+                                ...this.newTask,
+                                // 转换参与者ID为对象
+                                participants: this.newTask.participants.map(id => 
+                                    this.users.find(u => u.id === id)
+                                ).filter(Boolean),
+                                createdAt: new Date().toISOString().split('T')[0]
+                            };
+                            
+                            // 添加到任务列表
+                            this.tasks.unshift(newTask);
+                            
+                            // 更新统计数据
+                            this.taskStats.total++;
+                            switch(newTask.status) {
+                                case '待领取':
+                                    this.taskStats.pending++;
+                                    break;
+                                case '进行中':
+                                    this.taskStats.inProgress++;
+                                    break;
+                                case '已完成':
+                                    this.taskStats.completed++;
+                                    break;
+                            }
+                            
+                            this.$message.success('任务添加成功');
+                            this.addVisible = false;
+                        }
+                    });
+                },
+                
+                // 获取状态对应的标签类型
+                getStatusType(status) {
+                    switch(status) {
+                        case '待领取': return 'info';
+                        case '进行中': return 'warning';
+                        case '待审核': return 'primary';
+                        case '已完成': return 'success';
+                        default: return '';
+                    }
+                },
+                
+                // 选择变化
+                handleSelectionChange(rows) {
+                    this.selectedRows = rows;
+                },
+                
+                // 分页大小变化
+                handleSizeChange(val) {
+                    this.pageSize = val;
+                    this.currentPage = 1;
+                },
+                
+                // 当前页变化
+                handleCurrentChange(val) {
+                    this.currentPage = val;
+                },
+                
+                // 显示详情
+                showDetail(item) {
+                    this.selectedItem = { ...item };
+                    this.detailVisible = true;
+                },
+                
+                // 编辑任务
+                editItem(item) {
+                    this.selectedItem = { ...item };
+                    // 转换参与者ID为数组
+                    this.form = {
+                        ...item,
+                        participants: item.participants.map(p => p.id)
+                    };
+                    this.editVisible = true;
+                },
+                
+                // 保存编辑
+                saveEdit() {
+                    this.$refs.form.validate((valid) => {
+                        if (valid) {
+                            // 查找原任务索引
+                            const index = this.tasks.findIndex(t => t.id === this.selectedItem.id);
+                            if (index !== -1) {
+                                // 转换参与者ID为对象
+                                const participants = this.form.participants.map(id => 
+                                    this.users.find(u => u.id === id)
+                                ).filter(Boolean);
+                                
+                                // 更新任务
+                                this.tasks.splice(index, 1, {
+                                    ...this.form,
+                                    participants
+                                });
+                                
+                                this.$message.success('任务更新成功');
+                                this.editVisible = false;
+                            }
+                        }
+                    });
+                },
+                
+                // 删除任务
+                deleteItem(item) {
+                    this.$confirm('确定要删除这个任务吗？', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        const index = this.tasks.findIndex(t => t.id === item.id);
+                        if (index !== -1) {
+                            // 更新统计数据
+                            this.taskStats.total--;
+                            switch(item.status) {
+                                case '待领取':
+                                    this.taskStats.pending--;
+                                    break;
+                                case '进行中':
+                                    this.taskStats.inProgress--;
+                                    break;
+                                case '已完成':
+                                    this.taskStats.completed--;
+                                    break;
+                            }
+                            
+                            this.tasks.splice(index, 1);
+                            this.$message.success('任务已删除');
+                        }
+                    }).catch(() => {
+                        this.$message.info('已取消删除');
+                    });
+                },
+                
+                // 批量更新状态
+                batchUpdateStatus() {
+                    this.$confirm(`确定要将选中的 ${this.selectedRows.length} 个任务状态更新为 ${this.batchStatus} 吗？`, '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        this.selectedRows.forEach(selected => {
+                            const index = this.tasks.findIndex(t => t.id === selected.id);
+                            if (index !== -1) {
+                                // 更新统计数据
+                                const oldStatus = this.tasks[index].status;
+                                if (oldStatus !== this.batchStatus) {
+                                    // 减少旧状态计数
+                                    switch(oldStatus) {
+                                        case '待领取':
+                                            this.taskStats.pending--;
+                                            break;
+                                        case '进行中':
+                                            this.taskStats.inProgress--;
+                                            break;
+                                        case '已完成':
+                                            this.taskStats.completed--;
+                                            break;
+                                    }
+                                    // 增加新状态计数
+                                    switch(this.batchStatus) {
+                                        case '待领取':
+                                            this.taskStats.pending++;
+                                            break;
+                                        case '进行中':
+                                            this.taskStats.inProgress++;
+                                            break;
+                                        case '已完成':
+                                            this.taskStats.completed++;
+                                            break;
+                                    }
+                                }
+                                
+                                this.tasks[index].status = this.batchStatus;
+                            }
+                        });
+                        this.$message.success('状态更新成功');
+                        this.clearSelection();
+                    }).catch(() => {
+                        this.$message.info('已取消更新');
+                    });
+                },
+                
+                // 批量删除
+                batchDelete() {
+                    this.$confirm(`确定要删除选中的 ${this.selectedRows.length} 个任务吗？`, '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'error'
+                    }).then(() => {
+                        const idsToDelete = this.selectedRows.map(r => r.id);
+                        // 更新统计数据
+                        this.selectedRows.forEach(item => {
+                            this.taskStats.total--;
+                            switch(item.status) {
+                                case '待领取':
+                                    this.taskStats.pending--;
+                                    break;
+                                case '进行中':
+                                    this.taskStats.inProgress--;
+                                    break;
+                                case '已完成':
+                                    this.taskStats.completed--;
+                                    break;
+                            }
+                        });
+                        
+                        this.tasks = this.tasks.filter(t => !idsToDelete.includes(t.id));
+                        this.$message.success('任务已批量删除');
+                        this.clearSelection();
+                    }).catch(() => {
+                        this.$message.info('已取消删除');
+                    });
+                },
+                
+                // 取消选择
+                clearSelection() {
+                    this.$refs.table.clearSelection();
+                    this.selectedRows = [];
+                    this.batchStatus = '';
+                },
+                
+                // 重置筛选
+                resetFilters() {
+                    this.filters = {
+                        project: '',
+                        status: '',
+                        priority: '',
+                        assignee: '',
+                        dateRange: [],
+                        searchText: ''
+                    };
+                    this.currentPage = 1;
+                },
+                
+                // 导出数据
+                exportData() {
+                    this.$message.success('数据导出成功');
+                },
+                
+                // 刷新数据
+                refreshData() {
+                    this.loading = true;
+                    setTimeout(() => {
+                        this.loading = false;
+                        this.$message.success('数据已刷新');
+                    }, 800);
+                },
+                
+                // 切换页面
+                changePage(index) {
+                    this.$message.info(`切换到 ${index} 页面`);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
