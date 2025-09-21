@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>积分规则 - SDNU机器人与人工智能实验室协作管理平台</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+            background: #f0f2f5;
+        }
+        
+        /* 顶部主标题栏 */
+        .main-header {
+            background-color: #373d41;
+            color: white;
+            padding: 0 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        /* 二级导航栏 */
+        .second-header {
+            background-color: #4e5960;
+            height: 45px;
+            border-bottom: 1px solid #ddd;
+            width: 100%;
+        }
+        .el-menu--horizontal {
+            background-color: #4e5960;
+            border-bottom: none;
+            width: 100%;
+        }
+        .el-menu--horizontal .el-submenu {
+            float: left;
+        }
+        .el-menu--horizontal .el-submenu .el-submenu__title {
+            color: white;
+            height: 45px;
+            line-height: 45px;
+            border-bottom: 2px solid transparent;
+            padding: 0 20px;
+        }
+        .el-menu--horizontal .el-submenu .el-submenu__title:hover {
+            background-color: #5c6770;
+            border-bottom-color: #20a0ff;
+        }
+        .el-menu--horizontal .el-submenu.is-active .el-submenu__title {
+            border-bottom-color: #20a0ff;
+        }
+        .el-submenu__popup {
+            top: 45px !important;
+        }
+        .el-menu--popup {
+            background-color: #545c64;
+        }
+        .el-menu--popup .el-menu-item {
+            color: white;
+        }
+        .el-menu--popup .el-menu-item:hover {
+            background-color: #444c53;
+        }
+        
+        .layout-container {
+            min-height: 100vh;
+        }
+        
+        .main-container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .filter-bar {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .rule-container {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .rule-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .rule-section {
+            margin-bottom: 25px;
+        }
+        
+        .rule-section-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 15px 0;
+            color: #008066;
+        }
+        
+        .rule-item {
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+        
+        .points-badge {
+            display: inline-block;
+            background: #409EFF;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin: 0 5px;
+        }
+        
+        .rule-table {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="layout-container">
+            <!-- 顶部主标题栏 -->
+            <div class="main-header">
+                <div class="logo">
+                    <span>SDNU机器人与人工智能实验室协作管理平台</span>
+                </div>
+            </div>
+            
+            <!-- 二级导航栏 -->
+            <div class="second-header">
+                <el-menu mode="horizontal" @select="changePage">
+                    <!-- 用户管理二级菜单 -->
+                    <el-submenu index="user">
+                        <template slot="title">用户管理</template>
+                        <el-menu-item index="user-info">信息</el-menu-item>
+                        <el-menu-item index="user-points">积分</el-menu-item>
+                        <el-menu-item index="user-attendance">考勤</el-menu-item>
+                        <el-menu-item index="user-messaging">即时通讯</el-menu-item>
+                    </el-submenu>
+                    
+                    <!-- 设备管理二级菜单 -->
+                    <el-submenu index="device">
+                        <template slot="title">设备管理</template>
+                    </el-submenu>
+                    
+                    <!-- 任务管理二级菜单 -->
+                    <el-submenu index="task" class="is-active">
+                        <template slot="title">任务管理</template>
+                        <el-menu-item index="task-rules">积分规则</el-menu-item>
+                        <el-menu-item index="task-view">任务查看</el-menu-item>
+                        <el-menu-item index="task-my">我的任务</el-menu-item>
+                        <el-menu-item index="task-upload">成果上传</el-menu-item>
+                    </el-submenu>
+                </el-menu>
+            </div>
+            
+            <div class="main-container">
+                <!-- 筛选栏 - 保持布局一致性 -->
+                <div class="filter-bar">
+                    <div style="font-size: 16px; font-weight: bold;">积分规则查询</div>
+                    <div style="flex: 1;"></div>
+                    <el-button type="success" @click="exportRules">导出积分规则</el-button>
+                </div>
+                
+                <!-- 积分规则内容 -->
+                <el-card>
+                    <div class="rule-container">
+                        <div class="rule-title">实验室积分规则说明</div>
+                        
+                        <div class="rule-section">
+                            <div class="rule-section-title">一、积分体系概述</div>
+                            <div class="rule-item">
+                                实验室积分系统用于量化成员的贡献度，是评价成员参与度、贡献度的重要依据。积分可用于评优评先、获取资源支持、兑换奖励等。
+                            </div>
+                            <div class="rule-item">
+                                积分获取主要通过完成任务、参与项目、提出创新建议、帮助他人解决问题等方式。
+                            </div>
+                        </div>
+                        
+                        <div class="rule-section">
+                            <div class="rule-section-title">二、任务积分规则</div>
+                            <div class="rule-item">
+                                1. 任务积分根据任务难度、重要性和所需时间综合评定，分为低、中、高三个等级：
+                                <ul style="margin-top: 5px; margin-left: 20px;">
+                                    <li>低难度任务：<span class="points-badge">5-15分</span>，如文档整理、简单测试等</li>
+                                    <li>中等难度任务：<span class="points-badge">20-40分</span>，如模块开发、算法实现等</li>
+                                    <li>高难度任务：<span class="points-badge">50-100分</span>，如核心算法优化、系统架构设计等</li>
+                                </ul>
+                            </div>
+                            <div class="rule-item">
+                                2. 任务完成质量会影响最终积分，优质完成可获得<span class="points-badge">1.2倍</span>积分，未按时完成将扣除<span class="points-badge">30%</span>积分。
+                            </div>
+                            
+                            <el-table 
+                                :data="taskPointsTable" 
+                                border 
+                                class="rule-table">
+                                <el-table-column prop="taskType" label="任务类型" width="200"></el-table-column>
+                                <el-table-column prop="description" label="任务描述"></el-table-column>
+                                <el-table-column prop="pointsRange" label="积分范围" width="150"></el-table-column>
+                                <el-table-column prop="example" label="示例" width="200"></el-table-column>
+                            </el-table>
+                        </div>
+                        
+                        <div class="rule-section">
+                            <div class="rule-section-title">三、项目参与积分</div>
+                            <div class="rule-item">
+                                1. 参与实验室项目可获得项目基础积分，根据项目规模和持续时间确定：
+                                <ul style="margin-top: 5px; margin-left: 20px;">
+                                    <li>小型项目：<span class="points-badge">50-100分</span>/人</li>
+                                    <li>中型项目：<span class="points-badge">150-300分</span>/人</li>
+                                    <li>大型项目：<span class="points-badge">400-800分</span>/人</li>
+                                </ul>
+                            </div>
+                            <div class="rule-item">
+                                2. 项目负责人可获得额外<span class="points-badge">50%</span>的管理积分。
+                            </div>
+                            <div class="rule-item">
+                                3. 项目获奖可获得额外奖励积分：
+                                <ul style="margin-top: 5px; margin-left: 20px;">
+                                    <li>校级奖项：<span class="points-badge">100-200分</span></li>
+                                    <li>省级奖项：<span class="points-badge">300-500分</span></li>
+                                    <li>国家级奖项：<span class="points-badge">600-1000分</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="rule-section">
+                            <div class="rule-section-title">四、其他积分获取方式</div>
+                            <div class="rule-item">
+                                1. 提出有效建议并被采纳：<span class="points-badge">10-50分</span>/条
+                            </div>
+                            <div class="rule-item">
+                                2. 帮助他人解决技术问题：<span class="points-badge">5-20分</span>/次
+                            </div>
+                            <div class="rule-item">
+                                3. 撰写技术文档或分享：<span class="points-badge">15-50分</span>/篇
+                            </div>
+                            <div class="rule-item">
+                                4. 参与实验室例会和技术讨论：<span class="points-badge">2分</span>/次
+                            </div>
+                        </div>
+                        
+                        <div class="rule-section">
+                            <div class="rule-section-title">五、积分使用与兑换</div>
+                            <div class="rule-item">
+                                1. 积分达到<span class="points-badge">200分</span>可申请使用实验室高级设备
+                            </div>
+                            <div class="rule-item">
+                                2. 积分可兑换学习资料、开发板等物品（具体兑换列表见实验室公告）
+                            </div>
+                            <div class="rule-item">
+                                3. 年度积分排名前30%的成员将获得评优资格
+                            </div>
+                            <div class="rule-item">
+                                4. 积分可用于抵消因未完成任务等原因产生的惩罚
+                            </div>
+                        </div>
+                        
+                        <div class="rule-section">
+                            <div class="rule-section-title">六、积分管理</div>
+                            <div class="rule-item">
+                                1. 积分每月结算一次，由管理员审核确认
+                            </div>
+                            <div class="rule-item">
+                                2. 成员可在系统中查询自己的积分明细和排名
+                            </div>
+                            <div class="rule-item">
+                                3. 对积分有异议可在7天内提出申诉，由管理员团队复核
+                            </div>
+                        </div>
+                    </div>
+                </el-card>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    // 任务积分规则表格数据
+                    taskPointsTable: [
+                        {
+                            taskType: '日常管理',
+                            description: '实验室日常运营相关任务，难度较低',
+                            pointsRange: '5-15分',
+                            example: '值日安排、设备整理'
+                        },
+                        {
+                            taskType: '文档编写',
+                            description: '项目文档、技术文档编写',
+                            pointsRange: '10-30分',
+                            example: '用户手册、设计文档'
+                        },
+                        {
+                            taskType: '模块开发',
+                            description: '独立功能模块开发',
+                            pointsRange: '20-50分',
+                            example: '传感器数据采集模块'
+                        },
+                        {
+                            taskType: '算法实现',
+                            description: '算法研究与实现',
+                            pointsRange: '30-80分',
+                            example: '路径规划算法实现'
+                        },
+                        {
+                            taskType: '系统设计',
+                            description: '系统架构或核心模块设计',
+                            pointsRange: '60-120分',
+                            example: '机器人控制系统设计'
+                        },
+                        {
+                            taskType: '竞赛准备',
+                            description: '参与竞赛相关准备工作',
+                            pointsRange: '50-200分',
+                            example: 'RoboCup竞赛准备'
+                        }
+                    ]
+                };
+            },
+            methods: {
+                changePage(index) {
+                    // 这里可以添加页面跳转逻辑
+                    console.log('切换到页面:', index);
+                },
+                // 导出积分规则
+                exportRules() {
+                    this.$message({
+                        message: '积分规则导出功能已触发，实际应用中会生成PDF或Excel文件',
+                        type: 'success'
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
