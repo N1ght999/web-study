@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>轻音乐阅读夜 · Soft Music Reading</title>
+    <style>
+        body {
+            background-color: #FFE6EE;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .page {
+            display: inline-block;
+background-color: #fefaf5;
+box-shadow: 0 0 30px rgba(80, 58, 35, 0.25);
+text-align: left;
+max-width: 720px;
+        }
+        div table a {
+            color: #d9534f;
+        }
+        a:link {
+            color: #d9534f;
+            text-decoration: none;
+        }
+        a:visited {
+            color: #5cb85c;
+            text-decoration: none;
+        }
+        a:hover {
+            color: #f0ad4e;
+            text-decoration: underline;
+        }
+        a:active {
+            color: #0000ff;
+            text-decoration: underline;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            color: #d9534f;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        h1 {
+            font-size: 2em;
+            border-bottom: 2px solid #f0ad4e;
+            padding-bottom: 10px;
+        }
+        p#intro {
+            font-size: 1.1em;
+            font-weight: 500;
+            color: #d9534f;
+            padding: 12px 15px;
+            border-left: 4px solid #f0ad4e;
+            background-color: #fdf2f8;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        a.red {
+            color: #d9534f;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+        a.blue {
+            color: #5bc0de;
+            font-weight: bold;
+        }
+        p::first-letter {
+            font-size: 3em;
+            color: #d9534f;
+            float: left;
+            line-height: 0.8;
+            margin-right: 10px;
+            font-family: "Times New Roman", serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #f0ad4e;
+        }
+        th {
+            background-color: #fdf2f8;
+            color: #d9534f;
+            font-weight: 600;
+        }
+        tr:hover {
+            background-color: #fff5f7;
+        }
+        .status {
+            font-style: italic;
+            color: #5bc0de;
+            font-weight: 500;
+        }
+        .notice {
+            background-color: #faf0f5;
+            padding: 20px;
+            border-radius: 4px;
+            margin-top: 30px;
+        }
+        .notice p {
+            margin: 10px 0;
+            line-height: 1.6;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+   
+        <div>
+            <h1>轻音乐阅读夜</h1>
+            <p>Soft Music Reading</p>
+        </div>
+        
+        <div>
+            <h2 id="intro">关于我们：让旋律伴你，在文字中遇见自己</h2>
+            <p>
+                「弦音共鸣」轻音乐阅读夜，是一场为热爱阅读与音乐的朋友们精心准备的心灵盛宴。我们相信，当轻柔的旋律流淌在静谧的阅读时光中，文字的力量会被无限放大。在这里，我们希望为你搭建一个远离喧嚣、放松身心的角落，无论你是想沉浸在一本好书里，还是想静静地聆听一段旋律，都能找到属于自己的那份宁静与喜悦。我们会定期举办主题阅读分享、轻音乐欣赏、以及小型的音乐与文学沙龙，让思想与灵感在音符和文字间碰撞。
+            </p>
+            <p>
+                在过去的活动中，我们曾围绕“城市与孤独”、“自然与诗”等主题，邀请大家共读好书，并配以相应的轻音乐背景，营造了温馨而深刻的氛围。许多朋友在这里不仅找到了心仪的书籍，也结识了志同道合的伙伴，一起分享阅读的感悟，探讨音乐的魅力。加入我们，你将体验到阅读与音乐结合的独特魅力，让生活因这份美好而更加丰盈。
+            </p>
+            <p id="intro">
+                温馨提示：本次活动欢迎所有热爱生活、享受阅读的朋友参与。请带上你最爱的一本书，或者只是带着一颗放松的心前来。现场我们会准备一些轻音乐和简单的茶点，期待与你共同度过一个美好的夜晚。
+            </p>
+        </div>
+        
+        <div>
+            <h3>本期参与读者信息</h3>
+            <table>
+                <tr>
+                    <th>姓名</th>
+                    <th>学号/编号</th>
+                    <th>联系电话</th>
+                    <th>报名意向（可多选）</th>
+                    <th>阅读状态</th>
+                </tr>
+                <tr>
+                    <td>张三</td>
+                    <td>R2023001</td>
+                    <td>13800138000</td>
+                    <td>主题阅读分享、轻音乐欣赏</td>
+                    <td class="status">专注中</td>
+                </tr>
+                <tr>
+                    <td>李四</td>
+                    <td>R2023002</td>
+                    <td>13900139000</td>
+                    <td>文学沙龙、音乐赏析</td>
+                    <td class="status">松弛中</td>
+                </tr>
+                <tr>
+                    <td>王五</td>
+                    <td>R2023003</td>
+                    <td>13700137000</td>
+                    <td>主题阅读分享、小型音乐会</td>
+                    <td class="status">聆听中</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div>
+            <a class="red" href="https://hongchenwusdnu.github.io/bookstore/job4.html">查看往期活动照片</a>
+            <a class="blue" href="https://n1ght999.github.io/web-study/job3.html">在线咨询活动详情</a>
+        </div>
+        
+        <div class="notice">
+            <p>公告 1：本期“轻音乐阅读夜”活动时间为 2024 年 10 月 15 日晚 19:00 - 21:30。地点将通过短信通知，请保持手机畅通。</p>
+            <p>公告 2：为感谢朋友们的支持，凡是提前报名并到场的朋友，可获得我们精心准备的主题书签一枚。现场还有机会参与抽奖，赢取精选好书或高品质音乐 CD。</p>
+            <p>公告 3：如有任何疑问，可通过以下方式联系我们：① 官方 QQ 群：123456789；② 联系组织者小李：13500135000（微信同号）。我们将在 24 小时内回复你的咨询！</p>
+        </div>
+    
+</body>
+</html>
